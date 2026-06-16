@@ -1,10 +1,11 @@
 # Raspberry Pi CM5 / Debian Test Notes
 
-This is the primary test path for the project. The POC validates whether Tauri's Linux WebView on Raspberry Pi CM5 / Debian can support the critical migration blockers:
+This is the primary test path for the project. The POC validates whether Tauri's Linux WebView on Raspberry Pi CM5 / Debian can support the critical PRM client features while the renderer stays in JavaScript:
 
 - camera access through `navigator.mediaDevices.getUserMedia`
 - microphone access and local audio/video capture
 - WebRTC peer connection setup
+- existing Asterisk SIP/WebRTC registration through JsSIP
 - camera-based QR decoding
 
 This is a local validation project only. Do not copy files to PRM production machines, restart services, or deploy anything from this repository.
@@ -56,6 +57,7 @@ npm run tauri:dev
 - Local camera preview is visible.
 - Microphone permission is granted without WebView errors.
 - The loopback WebRTC call shows the local stream in the remote video panel.
+- Existing Asterisk SIP registration succeeds where the current PRM credentials are valid.
 - QR scanner decodes a QR code through the selected camera.
 
 ## Notes

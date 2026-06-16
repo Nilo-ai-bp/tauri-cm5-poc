@@ -2,30 +2,26 @@
 
 ## Objective
 
-Validate that Tauri can support the two most critical features of the current system:
+Validate that Tauri can support the critical PRM client features on Raspberry Pi CM5 / Debian while keeping the renderer in JavaScript:
 
-1. WebRTC
-2. Camera QR Scanner
-
----
+1. WebRTC media
+2. Camera QR scanning
+3. Existing Asterisk SIP/WebRTC registration
 
 ## Components
 
 ### Tauri Application
 
-Frontend:
+Renderer:
 - HTML
 - CSS
-- JavaScript
+- JavaScript / JSX
 
-Backend:
-- Rust (Tauri)
-
----
+Native shell:
+- Rust / Tauri
+- Minimal launcher only
 
 ## Module 1 - WebRTC Test
-
-Functions:
 
 - Open camera
 - Open microphone
@@ -33,46 +29,21 @@ Functions:
 - Establish WebRTC connection
 - Send audio/video stream
 
-Success Criteria:
-
-- Camera works
-- Microphone works
-- Audio works
-- Video works
-
----
-
 ## Module 2 - QR Scanner Test
-
-Functions:
 
 - Open camera
 - Read QR code
 - Display decoded content
 
-Success Criteria:
+## Module 3 - Existing Asterisk SIP Test
 
-- QR detected
-- QR decoded correctly
-- Scan speed acceptable
-
----
+- Register Totem endpoint
+- Register Operator endpoint
+- Place manual Totem-to-Operator call
+- Answer or hang up locally
 
 ## Test Platform
 
 - Raspberry Pi CM5
 - Debian Linux
-- Industrial Touchscreen PC
-
----
-
-## Final Validation
-
-Compare:
-
-- RAM usage
-- CPU usage
-- Startup time
-- Stability
-
-against Electron.
+- Existing PRM Asterisk at `192.168.0.176`

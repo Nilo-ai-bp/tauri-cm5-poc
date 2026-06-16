@@ -2,153 +2,51 @@
 
 ## Objective
 
-Evaluate whether Tauri can replace Electron for the Totem and Operator applications running on Raspberry Pi CM5 and Debian Linux industrial touch PCs.
+Create a minimal Tauri POC that keeps the renderer in the same JavaScript language style as the current PRM Totem and Operator apps.
 
----
+The POC validates only the core runtime risks on Raspberry Pi CM5 / Debian Linux: media devices, WebRTC, QR scanning, touchscreen-friendly UI, and existing Asterisk SIP/WebRTC behavior.
 
 ## Success Criteria
 
-The proof of concept will be considered successful if:
+The proof of concept is successful if:
 
-* WebRTC video calls work correctly
-* Camera access works
-* Microphone access works
-* Audio playback works
-* Touchscreen interaction works
-* Fullscreen kiosk mode works
-* WebSocket communication works
-* Scanner integration is feasible
-* CPU and RAM usage are lower than Electron
-* The application runs reliably on CM5
+- WebRTC video calls work correctly
+- Camera access works
+- Microphone access works
+- Audio playback works
+- Touchscreen interaction works
+- Fullscreen/kiosk launch remains feasible
+- Existing Asterisk SIP/WebRTC registration works
+- Scanner integration is feasible
+- The application runs reliably on CM5
 
----
+## Phase 1 - Minimal Tauri Shell
 
-## Phase 1 - Research
+- Tauri v2 native shell
+- Vite JavaScript renderer
+- Touch-friendly UI
 
-### Goals
+## Phase 2 - Media Validation
 
-Research Tauri suitability for:
+- Camera access
+- Microphone access
+- Audio playback
+- WebRTC loopback call
 
-* Raspberry Pi CM5
-* ARM64 Debian Linux
-* WebRTC
-* Camera and microphone access
-* Audio handling
-* Kiosk mode
-* Hardware acceleration
-* WebSocket communication
+## Phase 3 - Existing Asterisk Validation
 
-### Deliverable
+- Totem SIP registration
+- Operator SIP registration
+- Manual Totem-to-Operator call
 
-Research report with findings and risks.
+## Phase 4 - QR Scanner Validation
 
----
-
-## Phase 2 - Environment Setup
-
-### Goals
-
-Prepare development environment:
-
-* Rust
-* Node.js
-* Tauri CLI
-* Linux dependencies
-
-### Deliverable
-
-Working Tauri development environment.
-
----
-
-## Phase 3 - Basic Tauri Application
-
-### Goals
-
-Create a standalone Tauri application with:
-
-* Fullscreen mode
-* Touch-friendly UI
-* Basic navigation
-
-### Deliverable
-
-Running Tauri application.
-
----
-
-## Phase 4 - Media Validation
-
-### Goals
-
-Validate:
-
-* Camera access
-* Microphone access
-* Audio playback
-* WebRTC video calls
-
-### Deliverable
-
-Media test report.
-
----
-
-## Phase 5 - Communication Validation
-
-### Goals
-
-Validate:
-
-* WebSocket connectivity
-* Backend communication
-* Message exchange
-
-### Deliverable
-
-Communication test report.
-
----
-
-## Phase 6 - Performance Benchmark
-
-### Goals
-
-Compare Tauri and Electron:
-
-* RAM usage
-* CPU usage
-* Startup time
-* Stability
-
-### Deliverable
-
-Benchmark report.
-
----
-
-## Phase 7 - CM5 Deployment
-
-### Goals
-
-Deploy on Raspberry Pi CM5 and test:
-
-* Touchscreen
-* WebRTC
-* Camera
-* Audio
-* Kiosk mode
-
-### Deliverable
-
-Deployment and validation report.
-
----
+- Scanner camera selection
+- QR decode test
+- Repeated scan stability
 
 ## Final Deliverables
 
-* Source code repository
-* Research report
-* Benchmark report
-* CM5 test report
-* Recommendation: Tauri or Electron
+- Source code repository
+- CM5 test notes
+- Minimal recommendation for reusing PRM JavaScript renderer code in Tauri

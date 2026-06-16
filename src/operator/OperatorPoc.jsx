@@ -1,25 +1,6 @@
-import { forwardRef, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import JsSIP from "jssip";
 import { Camera, CheckCircle2, LogOut, Mic, PhoneCall, PhoneOff, RefreshCw, RadioTower, XCircle } from "lucide-react";
-
-type DeviceInfo = {
-  cameras: MediaDeviceInfo[];
-  microphones: MediaDeviceInfo[];
-};
-
-type TestStatus = "idle" | "running" | "ok" | "error";
-
-type LogEntry = {
-  time: string;
-  message: string;
-};
-
-type IncomingSession = {
-  answer: (options: Record<string, unknown>) => void;
-  terminate: () => void;
-  connection?: RTCPeerConnection;
-  on: (event: string, handler: (...args: unknown[]) => void) => void;
-};
 
 const DEFAULT_ASTERISK_WSS = "wss://192.168.0.176:8089/ws";
 const DEFAULT_OPERATOR_ID = "op-002";
@@ -29,11 +10,11 @@ function now() {
   return new Date().toLocaleTimeString();
 }
 
-function deviceName(device: MediaDeviceInfo, index: number, fallback: string) {
+function deviceName(device, index, fallback) {
   return device.label || `${fallback} ${index + 1}`;
 }
 
-function sipDomainFromWss(wssUrl: string) {
+function sipDomainFromWss(wssUrl) {
   try {
     return new URL(wssUrl).hostname;
   } catch {
@@ -45,26 +26,26 @@ export function OperatorPoc() {
   const [asteriskWssUrl, setAsteriskWssUrl] = useState(DEFAULT_ASTERISK_WSS);
   const [operatorId, setOperatorId] = useState(DEFAULT_OPERATOR_ID);
   const [sipPassword, setSipPassword] = useState(DEFAULT_OPERATOR_PASSWORD);
-  const [devices, setDevices] = useState<DeviceInfo>({ cameras: [], microphones: [] });
+  const [devices, setDevices] = useState({ cameras: [], microphones: [] });
   const [cameraId, setCameraId] = useState("");
   const [microphoneId, setMicrophoneId] = useState("");
-  const [mediaStatus, setMediaStatus] = useState<TestStatus>("idle");
-  const [registrationStatus, setRegistrationStatus] = useState<TestStatus>("idle");
-  const [callStatus, setCallStatus] = useState<TestStatus>("idle");
+  const [mediaStatus, setMediaStatus] = useState("idle");
+  const [registrationStatus, setRegistrationStatus] = useState("idle");
+  const [callStatus, setCallStatus] = useState("idle");
   const [error, setError] = useState("");
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState([]);
 
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const uaRef = useRef<unknown>(null);
-  const incomingSessionRef = useRef<IncomingSession | null>(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const uaRef = useRef(null);
+  const incomingSessionRef = useRef(null);
 
-  const log = useCallback((message: string) => {
+  const log = useCallback((message) => {
     setLogs((items) => [{ time: now(), message }, ...items].slice(0, 24));
   }, []);
 
-  const stopStream = useCallback((stream: MediaStream | null) => {
+  const stopStream = useCallback((stream) => {
     stream?.getTracks().forEach((track) => track.stop());
   }, []);
 
@@ -117,7 +98,7 @@ export function OperatorPoc() {
   }, [cameraId, enumerateDevices, log, microphoneId, stopStream]);
 
   const bindSessionMedia = useCallback(
-    (session: IncomingSession) => {
+    (session) => {
       const connection = session.connection;
       if (!connection) {
         return;
@@ -166,13 +147,13 @@ export function OperatorPoc() {
         setRegistrationStatus("ok");
         log(`Registered as ${operatorId.trim()} on existing Asterisk.`);
       });
-      ua.on("registrationFailed", (event: { cause?: string }) => {
+      ua.on("registrationFailed", (event) => {
         setRegistrationStatus("error");
         const message = event.cause || "SIP registration failed.";
         setError(message);
         log(`SIP registration failed: ${message}`);
       });
-      ua.on("newRTCSession", (event: { originator: string; session: IncomingSession }) => {
+      ua.on("newRTCSession", (event) => {
         const { originator, session } = event;
 
         if (originator !== "remote") {
@@ -201,7 +182,7 @@ export function OperatorPoc() {
           }
           log("Operator call ended.");
         });
-        session.on("failed", (_event: unknown) => {
+        session.on("failed", () => {
           incomingSessionRef.current = null;
           setCallStatus("error");
           if (remoteVideoRef.current) {
@@ -223,7 +204,7 @@ export function OperatorPoc() {
   }, [asteriskWssUrl, bindSessionMedia, log, operatorId, requestMedia, sipPassword]);
 
   const unregisterOperator = useCallback(() => {
-    const ua = uaRef.current as { stop?: () => void } | null;
+    const ua = uaRef.current;
     ua?.stop?.();
     uaRef.current = null;
     setRegistrationStatus("idle");
@@ -276,7 +257,7 @@ export function OperatorPoc() {
 
     return () => {
       incomingSessionRef.current?.terminate();
-      const ua = uaRef.current as { stop?: () => void } | null;
+      const ua = uaRef.current;
       ua?.stop?.();
       stopStream(localStreamRef.current);
     };
@@ -286,7 +267,7 @@ export function OperatorPoc() {
     <>
       <section className="topbar">
         <div>
-          <p className="eyebrow">Operator-side Tauri validation</p>
+          <p className="eyebrow">Operator-side Tauri JavaScript validation</p>
           <h1>Existing Asterisk SIP/WebRTC POC</h1>
         </div>
         <button className="iconButton" type="button" onClick={enumerateDevices} title="Refresh devices">
@@ -405,11 +386,6 @@ function Panel({
   icon,
   status,
   children,
-}: {
-  title: string;
-  icon: ReactNode;
-  status: TestStatus;
-  children: ReactNode;
 }) {
   return (
     <section className="panel">
@@ -425,11 +401,11 @@ function Panel({
   );
 }
 
-function StatusBadge({ status }: { status: TestStatus }) {
+function StatusBadge({ status }) {
   return <span className={`status status-${status}`}>{status}</span>;
 }
 
-const VideoFrame = forwardRef<HTMLVideoElement, { label: string; muted?: boolean }>(({ label, muted }, ref) => (
+const VideoFrame = forwardRef(({ label, muted }, ref) => (
   <figure className="videoFrame">
     <video ref={ref} autoPlay playsInline muted={muted} />
     <figcaption>{label}</figcaption>

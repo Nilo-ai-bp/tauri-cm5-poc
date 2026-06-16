@@ -48,17 +48,3 @@ The Totem-side SIP panel registers as the existing totem endpoint and can manual
 | Asterisk WSS | `wss://192.168.0.176:8089/ws` |
 
 The Operator-side POC registers as the existing operator endpoint and waits for incoming SIP/WebRTC calls.
-
-## Minimal Test Shape
-
-1. Register Operator POC as `op-002`.
-2. Register Totem POC as `totem-001`.
-3. From Totem POC, call `op-002`.
-4. From Operator POC, answer the incoming call.
-5. Confirm local and remote audio/video appear.
-
-The mode switch keeps both POC screens mounted so registration can stay active while switching between Totem and Operator views.
-
-## Certificate Risk
-
-The existing Asterisk WSS endpoint may use a self-signed certificate. If Tauri/WebKitGTK rejects the WSS connection, the test has found a migration issue. Do not solve that by changing Asterisk from this POC.

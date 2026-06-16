@@ -1,5 +1,5 @@
-import { forwardRef, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { BrowserQRCodeReader } from "@zxing/browser";
 import JsSIP from "jssip";
 import {
   Camera,
@@ -18,28 +18,9 @@ import {
   Square,
   XCircle,
 } from "lucide-react";
-import { OperatorPoc } from "./operator/OperatorPoc";
+import { OperatorPoc } from "./operator/OperatorPoc.jsx";
 
-type DeviceInfo = {
-  cameras: MediaDeviceInfo[];
-  microphones: MediaDeviceInfo[];
-  speakers: MediaDeviceInfo[];
-};
-
-type TestStatus = "idle" | "running" | "ok" | "error";
-
-type LogEntry = {
-  time: string;
-  message: string;
-};
-
-type SipSession = {
-  terminate: () => void;
-  connection?: RTCPeerConnection;
-  on: (event: string, handler: (...args: unknown[]) => void) => void;
-};
-
-const emptyDevices: DeviceInfo = {
+const emptyDevices = {
   cameras: [],
   microphones: [],
   speakers: [],
@@ -54,11 +35,11 @@ function now() {
   return new Date().toLocaleTimeString();
 }
 
-function deviceName(device: MediaDeviceInfo, index: number, fallback: string) {
+function deviceName(device, index, fallback) {
   return device.label || `${fallback} ${index + 1}`;
 }
 
-function sipDomainFromWss(wssUrl: string) {
+function sipDomainFromWss(wssUrl) {
   try {
     return new URL(wssUrl).hostname;
   } catch {
@@ -66,10 +47,8 @@ function sipDomainFromWss(wssUrl: string) {
   }
 }
 
-type PocMode = "totem" | "operator";
-
 export function App() {
-  const [mode, setMode] = useState<PocMode>("totem");
+  const [mode, setMode] = useState("totem");
 
   return (
     <main className="shell">
@@ -94,38 +73,38 @@ export function App() {
 }
 
 function TotemPoc() {
-  const [devices, setDevices] = useState<DeviceInfo>(emptyDevices);
+  const [devices, setDevices] = useState(emptyDevices);
   const [videoCameraId, setVideoCameraId] = useState("");
   const [scannerCameraId, setScannerCameraId] = useState("");
   const [microphoneId, setMicrophoneId] = useState("");
   const [speakerId, setSpeakerId] = useState("");
-  const [permissionStatus, setPermissionStatus] = useState<TestStatus>("idle");
-  const [callStatus, setCallStatus] = useState<TestStatus>("idle");
-  const [sipRegistrationStatus, setSipRegistrationStatus] = useState<TestStatus>("idle");
-  const [sipCallStatus, setSipCallStatus] = useState<TestStatus>("idle");
-  const [qrStatus, setQrStatus] = useState<TestStatus>("idle");
+  const [permissionStatus, setPermissionStatus] = useState("idle");
+  const [callStatus, setCallStatus] = useState("idle");
+  const [sipRegistrationStatus, setSipRegistrationStatus] = useState("idle");
+  const [sipCallStatus, setSipCallStatus] = useState("idle");
+  const [qrStatus, setQrStatus] = useState("idle");
   const [qrText, setQrText] = useState("");
   const [error, setError] = useState("");
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState([]);
   const [asteriskWssUrl, setAsteriskWssUrl] = useState(DEFAULT_ASTERISK_WSS);
   const [totemSipId, setTotemSipId] = useState(DEFAULT_TOTEM_ID);
   const [totemSipPassword, setTotemSipPassword] = useState(DEFAULT_TOTEM_PASSWORD);
   const [operatorExtension, setOperatorExtension] = useState(DEFAULT_OPERATOR_EXTENSION);
 
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-  const qrVideoRef = useRef<HTMLVideoElement | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const qrControlsRef = useRef<IScannerControls | null>(null);
-  const peersRef = useRef<RTCPeerConnection[]>([]);
-  const totemUaRef = useRef<unknown>(null);
-  const totemSipSessionRef = useRef<SipSession | null>(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const qrVideoRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const qrControlsRef = useRef(null);
+  const peersRef = useRef([]);
+  const totemUaRef = useRef(null);
+  const totemSipSessionRef = useRef(null);
 
-  const log = useCallback((message: string) => {
+  const log = useCallback((message) => {
     setLogs((items) => [{ time: now(), message }, ...items].slice(0, 20));
   }, []);
 
-  const stopStream = useCallback((stream: MediaStream | null) => {
+  const stopStream = useCallback((stream) => {
     stream?.getTracks().forEach((track) => track.stop());
   }, []);
 
@@ -179,11 +158,13 @@ function TotemPoc() {
       await enumerateDevices();
       setPermissionStatus("ok");
       log("Camera and microphone permission granted.");
+      return stream;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unable to access camera or microphone.";
       setError(message);
       setPermissionStatus("error");
       log(`Media permission failed: ${message}`);
+      return null;
     }
   }, [enumerateDevices, log, microphoneId, stopStream, videoCameraId]);
 
@@ -200,7 +181,7 @@ function TotemPoc() {
   }, [log]);
 
   const bindSipSessionMedia = useCallback(
-    (session: SipSession) => {
+    (session) => {
       const connection = session.connection;
       if (!connection) {
         return;
@@ -307,13 +288,13 @@ function TotemPoc() {
         setSipRegistrationStatus("ok");
         log(`Totem registered as ${totemSipId.trim()} on existing Asterisk.`);
       });
-      ua.on("registrationFailed", (event: { cause?: string }) => {
+      ua.on("registrationFailed", (event) => {
         const message = event.cause || "Totem SIP registration failed.";
         setError(message);
         setSipRegistrationStatus("error");
         log(`Totem SIP registration failed: ${message}`);
       });
-      ua.on("newRTCSession", (event: { session: SipSession }) => {
+      ua.on("newRTCSession", (event) => {
         const session = event.session;
         totemSipSessionRef.current = session;
         bindSipSessionMedia(session);
@@ -352,7 +333,7 @@ function TotemPoc() {
   }, [asteriskWssUrl, bindSipSessionMedia, log, requestMedia, totemSipId, totemSipPassword]);
 
   const unregisterTotemSip = useCallback(() => {
-    const ua = totemUaRef.current as { stop?: () => void } | null;
+    const ua = totemUaRef.current;
     ua?.stop?.();
     totemUaRef.current = null;
     setSipRegistrationStatus("idle");
@@ -360,7 +341,7 @@ function TotemPoc() {
   }, [log]);
 
   const callOperatorViaAsterisk = useCallback(async () => {
-    const ua = totemUaRef.current as { call?: (target: string, options: Record<string, unknown>) => SipSession } | null;
+    const ua = totemUaRef.current;
 
     if (!ua?.call) {
       const message = "Register the Totem SIP endpoint before calling the operator.";
@@ -444,10 +425,7 @@ function TotemPoc() {
 
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
-    const setSinkId =
-      remoteVideo && "setSinkId" in remoteVideo
-        ? (remoteVideo as HTMLVideoElement & { setSinkId: (id: string) => Promise<void> }).setSinkId
-        : null;
+    const setSinkId = remoteVideo && typeof remoteVideo.setSinkId === "function" ? remoteVideo.setSinkId : null;
 
     if (!remoteVideo || !setSinkId || !speakerId) {
       return;
@@ -456,7 +434,7 @@ function TotemPoc() {
     setSinkId
       .call(remoteVideo, speakerId)
       .then(() => log("Remote call output device updated."))
-      .catch((err: unknown) => {
+      .catch((err) => {
         const message = err instanceof Error ? err.message : "Speaker output selection is not supported.";
         log(`Speaker selection skipped: ${message}`);
       });
@@ -478,7 +456,7 @@ function TotemPoc() {
       stopQrScanner();
       stopCall();
       totemSipSessionRef.current?.terminate();
-      const ua = totemUaRef.current as { stop?: () => void } | null;
+      const ua = totemUaRef.current;
       ua?.stop?.();
       stopStream(localStreamRef.current);
     };
@@ -672,11 +650,6 @@ function Panel({
   icon,
   status,
   children,
-}: {
-  title: string;
-  icon: ReactNode;
-  status: TestStatus;
-  children: ReactNode;
 }) {
   return (
     <section className="panel">
@@ -692,11 +665,11 @@ function Panel({
   );
 }
 
-function StatusBadge({ status }: { status: TestStatus }) {
+function StatusBadge({ status }) {
   return <span className={`status status-${status}`}>{status}</span>;
 }
 
-const VideoFrame = forwardRef<HTMLVideoElement, { label: string; muted?: boolean }>(({ label, muted }, ref) => (
+const VideoFrame = forwardRef(({ label, muted }, ref) => (
   <figure className="videoFrame">
     <video ref={ref} autoPlay playsInline muted={muted} />
     <figcaption>{label}</figcaption>

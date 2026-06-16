@@ -1,4 +1,4 @@
-# Operator-Side Tauri POC
+# Operator-Side Tauri JavaScript POC
 
 This adds a minimal local Operator-side Tauri screen next to the existing Totem-side CM5 screen.
 
@@ -6,7 +6,7 @@ It is local-only. It must not deploy files, SSH into machines, restart services,
 
 ## Goal
 
-Validate whether Tauri-based Totem and Operator frontends can register to the existing PRM Asterisk WebRTC service and place/receive a SIP/WebRTC call without changing the server.
+Validate whether minimal Tauri Totem and Operator frontends, written in JavaScript/JSX, can register to the existing PRM Asterisk WebRTC service and place/receive a SIP/WebRTC call without changing the server.
 
 ## Existing Asterisk Assumptions
 
@@ -34,22 +34,6 @@ Do not change these settings for this POC.
 - Shows local operator preview and remote totem media.
 - Logs browser/Tauri-side registration and call events.
 
-## What The Totem SIP Panel Does
-
-- Keeps the existing local camera/mic/WebRTC loopback/QR tests.
-- Adds an optional `Existing Asterisk SIP` panel.
-- Registers as `totem-001` by default.
-- Calls `op-002` through the existing Asterisk dialplan by default.
-- Reuses the same local/remote video panels as the loopback test.
-
-## What It Does Not Do
-
-- It does not connect to the PRM FastAPI operator WebSocket.
-- It does not accept queue items.
-- It does not create or change SIP users.
-- It does not modify Asterisk config.
-- It does not replace the current production Operator app.
-
 ## Expected Test Flow With Existing PRM System
 
 1. Start this local Tauri POC.
@@ -71,10 +55,8 @@ Do not change these settings for this POC.
 10. Click `Call operator`.
 11. When the incoming call appears on the Operator screen, click `Answer`.
 
-The existing server/Asterisk flow should remain the source of truth for production. This POC only checks whether Tauri can behave as the Totem and Operator SIP/WebRTC endpoints against the current Asterisk configuration.
+The existing server/Asterisk flow should remain the source of truth for production. This POC only checks whether a minimal Tauri JavaScript client can behave as the Totem and Operator SIP/WebRTC endpoints against the current Asterisk configuration.
 
 ## Known Risk
 
-The existing Electron clients can tolerate the self-signed Asterisk WSS certificate. Tauri/WebKitGTK may require the certificate to be trusted by the test machine before `wss://192.168.0.176:8089/ws` succeeds.
-
-This POC should reveal that compatibility issue. Do not work around it by changing Asterisk config in this repository.
+The existing Asterisk WSS endpoint may use a self-signed certificate. Tauri/WebKitGTK may require the certificate to be trusted by the test machine before `wss://192.168.0.176:8089/ws` succeeds. Do not change Asterisk config from this repository.

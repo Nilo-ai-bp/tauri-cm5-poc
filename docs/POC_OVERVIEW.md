@@ -1,6 +1,6 @@
 # Tauri CM5 / Debian POC
 
-Minimal proof of concept for validating Tauri on Raspberry Pi CM5 with Debian Linux before migrating the full Totem/Operator app. It also includes a minimal Operator-side SIP/WebRTC screen to test against the existing PRM Asterisk setup.
+Minimal proof of concept for validating Tauri on Raspberry Pi CM5 with Debian Linux, using a PRM-style JavaScript renderer. It includes Totem-side and Operator-side SIP/WebRTC screens for testing against the existing PRM Asterisk setup.
 
 The target platform is the CM5 totem. Windows is only the current editing workstation for these local files.
 
@@ -15,7 +15,7 @@ No deployment is part of this POC. Do not copy files to PRM hosts, restart servi
 | Operator SIP | Existing Asterisk WSS registration and incoming call answer |
 | QR Scanner | Camera-based QR scanning |
 | Platform | Raspberry Pi CM5 / Debian Linux, ARM64 |
-| Goal | Verify whether Tauri can support the critical features before migration |
+| Goal | Verify critical PRM client features in a Tauri shell with JavaScript renderer code |
 
 ## Commands On CM5 / Debian
 

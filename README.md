@@ -1,17 +1,29 @@
 # Tauri CM5 POC
 
 Purpose:
-Evaluate whether Tauri can replace Electron for the Totem and Operator applications running on Raspberry Pi CM5 and Debian Linux industrial touch PCs.
+Minimal Tauri proof of concept for Raspberry Pi CM5 and Debian Linux, using a PRM-style JavaScript renderer instead of TypeScript.
 
 Goals:
-- Compare resource usage
 - Test WebRTC
 - Test camera
 - Test microphone
 - Test audio
-- Test kiosk mode
-- Test touchscreen
-- Test ARM64 compatibility
+- Test QR scanning
+- Test existing Asterisk SIP/WebRTC registration
+- Keep the renderer close to the current PRM JavaScript clients
 
 Status:
-Planning Phase
+Minimal POC
+
+## Commands
+
+```bash
+npm install
+npm run tauri:dev
+```
+
+Build a local Debian bundle on the CM5:
+
+```bash
+npm run tauri:build
+```
